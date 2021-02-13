@@ -1,0 +1,10 @@
+{% extends 'index.html' %}
+{% block content %}
+<form action="#" method="post">
+    {% for productName in result %}
+        {% for product in productName %}
+            <input type="submit" name="productType" value={{product}}>
+        {% endfor %}
+    {% endfor %}
+</form>
+{% endblock content %}

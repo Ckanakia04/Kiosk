@@ -1,0 +1,8 @@
+{% extends 'index.html' %}
+{% block content %}
+<form action="#" method="post">
+    {% for raceType in raceTypes %}
+    <input type="submit" name="raceType" value={{raceType}}>
+    {% endfor %}
+</form>
+{% endblock content %}
