@@ -13,6 +13,8 @@ mysql = MySQL(app)
 
 raceTypes = ["Throughbreed","Harness"]
 
+trial = "trial"
+
 #shift userSelection in "else" block of "landing" function
 userSelection = {
     'race':'',
