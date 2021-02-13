@@ -20,6 +20,8 @@ userSelection = {
     'track':''
 }
 
+test = "test"
+
 @app.route("/", methods=["POST","GET"])
 def landing():
     if request.method == 'POST':
