@@ -13,6 +13,11 @@ mysql = MySQL(app)
 
 raceTypes = ["Throughbreed","Harness"]
 
+<<<<<<< Updated upstream
+=======
+trial = "aaaa"
+
+>>>>>>> Stashed changes
 #shift userSelection in "else" block of "landing" function
 userSelection = {
     'race':'',
