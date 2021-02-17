@@ -118,27 +118,26 @@ def printPPE(userSelection):
 def get_ppe_name(data_dict):
     product = data_dict['product']
     # print("PRODUCT FROM DICT",product,file=sys.stderr)
-    product_qty_query = f"select product_id, product_qty from Product where product_name = '{product}'"
-    ck = cursor.execute(product_qty_query)
-    print("HEREEEE-------",ck,file=sys.stderr)
-    # result = list(cursor.fetchone())
+    product_qty_query = f"select product_qty from Product where product_id = '{product}'"
+    cursor.execute(product_qty_query)
+    result = list(cursor.fetchone())
     # product = result[0]
-    # product_qty = int(result[1])
-    # ppe_file_name  = []
-    # ppe_file = []
-    # for i in range(product_qty):
-    #     ppe_file_query = f"select ppe_id from Kiosk.Race where product_id = '{product}' and date = '{data_dict['date']}' and race_course_name = '{data_dict['track'][i]}'"
-    #     cursor.execute(ppe_file_query)
-    #     result = str(cursor.fetchone()[0])
-    #     ppe_file_name.append(result)
+    product_qty = int(result[0])
+    ppe_file_name  = []
+    ppe_file = []
+    for i in range(product_qty):
+        ppe_file_query = f"select ppe_id from Kiosk.Race where product_id = '{product}' and date = '{data_dict['date']}' and race_course_name = '{data_dict['track'][i]}'"
+        cursor.execute(ppe_file_query)
+        result = str(cursor.fetchone()[0])
+        ppe_file_name.append(result)
     
-    # for file in ppe_file_name:
-    #     get_details = f"select location, ftp_client,ppe_file_name from PPE where ppe_id= '{file}'"
-    #     cursor.execute(get_details)
-    #     result =  list(cursor.fetchone())
-    #     ppe_file.append(download_ppe(result))
-    # print_ppe(ppe_file)
-    # return ppe_file_name
+    for file in ppe_file_name:
+        get_details = f"select location, ftp_client,ppe_file_name from PPE where ppe_id= '{file}'"
+        cursor.execute(get_details)
+        result =  list(cursor.fetchone())
+        ppe_file.append(download_ppe(result))
+    print_ppe(ppe_file)
+    return ppe_file_name
      
 def download_ppe(location_list):
     location = location_list[0]
@@ -149,11 +148,10 @@ def download_ppe(location_list):
     with FTP(ftp_client) as ftp:
         ftp.login(user=creds[0],passwd=creds[1])
         ftp.cwd(location)
-        local_filename = os.path.join(r"/Users/bhavik_msh/MSH/Equibase", ppe_filename)
+        local_filename = os.path.join(r"/Users/chait/Desktop/MSH Prototype", ppe_filename)
         lf = open(local_filename, "wb")
         ftp.retrbinary("RETR " + ppe_filename, lf.write, 8*1024)
         lf.close()
-    
     return ppe_filename
     
 def print_ppe(ppe_file):
