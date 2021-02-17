@@ -2,6 +2,12 @@ from flask import Flask, redirect, url_for, render_template, request
 from flaskext.mysql import MySQL
 import sys
 
+#BHAVIK
+from ftplib import FTP
+import os
+import psutil
+from time import sleep
+
 # print("HEREEEEEE",request.form['productType'],file=sys.stderr)
 # print("HEREEEEEE",selectedProductId,file=sys.stderr)
 
@@ -87,7 +93,8 @@ def date(selectedProductId):
 @app.route("/track/<selectedDate>", methods=["POST","GET"])
 def track(selectedDate):
     if request.method == 'POST':
-        selectedTrack = request.form['track']
+        selectedTrack = []
+        selectedTrack.append(request.form['track']) 
         userSelection.update({
             "track":selectedTrack
         })
@@ -99,6 +106,73 @@ def track(selectedDate):
             return render_template("trackSelection.html",result=result,userSelection=userSelection)
         else:
             return("DATE NOT WORKING!")#ERROR PAGE
+
+@app.route("/print")
+def print():
+    return redirect(url_for("print",userSelection=userSelection))
+
+
+
+#BHAVIK
+def get_ppe_name(data_dict):
+    cursor = connection.cursor()
+    product = data_dict['product']
+    product_qty_query = f"select product_id, product_qty from Product where product_name = '{product}'"
+    cursor.execute(product_qty_query)
+    result = list(cursor.fetchone())
+    product = result[0]
+    product_qty = int(result[1])
+    ppe_file_name  = []
+    ppe_file = []
+    for i in range(product_qty):
+        ppe_file_query = f"select ppe_id from Kiosk.Race where product_id = '{product}' and date = '{data_dict['date']}' and race_course_name = '{data_dict['track'][i]}'"
+        cursor.execute(ppe_file_query)
+        result = str(cursor.fetchone()[0])
+        ppe_file_name.append(result)
+    
+    for file in ppe_file_name:
+        get_details = f"select location, ftp_client,ppe_file_name from PPE where ppe_id= '{file}'"
+        cursor.execute(get_details)
+        result =  list(cursor.fetchone())
+        ppe_file.append(download_ppe(result))
+    print_ppe(ppe_file)
+    return ppe_file_name
+     
+def download_ppe(location_list):
+    location = location_list[0]
+    ftp_client = location_list[1]
+    ppe_filename = location_list[2]
+    if ftp_client == "ftp.jockeyclub.com":
+        creds = ["mshs","3Wqbg3FK"]
+    with FTP(ftp_client) as ftp:
+        try:
+           ftp.login(user=creds[0],passwd=creds[1])
+           ftp.cwd(location)
+           local_filename = os.path.join(r"/Users/bhavik_msh/MSH/Equibase", ppe_filename)
+           lf = open(local_filename, "wb")
+           ftp.retrbinary("RETR " + ppe_filename, lf.write, 8*1024)
+           lf.close()
+        except Exception as e:
+            print('FTP error:', e)
+    
+    return ppe_filename
+    
+def print_ppe(ppe_file):
+    for file in ppe_file:
+        os.startfile(file,"print")
+        sleep(5)
+        for p in psutil.process_iter(): #Close Acrobat after printing the PDF
+            if 'AcroRd' in str(p):
+                p.kill()
+    
+data_dict = {
+    'race':'Throughbreed',
+    'date':'0214',
+    'product':'Basic Program Throughbreed',
+    'track':['golden gate fields', '','']
+}
+get_ppe_name(data_dict)
+    
 
 if __name__ == "__main__":
     app.run(debug=True)
