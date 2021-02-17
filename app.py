@@ -115,7 +115,6 @@ def print():
 
 #BHAVIK
 def get_ppe_name(data_dict):
-    cursor = connection.cursor()
     product = data_dict['product']
     product_qty_query = f"select product_id, product_qty from Product where product_name = '{product}'"
     cursor.execute(product_qty_query)
@@ -145,15 +144,12 @@ def download_ppe(location_list):
     if ftp_client == "ftp.jockeyclub.com":
         creds = ["mshs","3Wqbg3FK"]
     with FTP(ftp_client) as ftp:
-        try:
-           ftp.login(user=creds[0],passwd=creds[1])
-           ftp.cwd(location)
-           local_filename = os.path.join(r"/Users/bhavik_msh/MSH/Equibase", ppe_filename)
-           lf = open(local_filename, "wb")
-           ftp.retrbinary("RETR " + ppe_filename, lf.write, 8*1024)
-           lf.close()
-        except Exception as e:
-            print('FTP error:', e)
+        ftp.login(user=creds[0],passwd=creds[1])
+        ftp.cwd(location)
+        local_filename = os.path.join(r"/Users/bhavik_msh/MSH/Equibase", ppe_filename)
+        lf = open(local_filename, "wb")
+        ftp.retrbinary("RETR " + ppe_filename, lf.write, 8*1024)
+        lf.close()
     
     return ppe_filename
     
@@ -165,13 +161,6 @@ def print_ppe(ppe_file):
             if 'AcroRd' in str(p):
                 p.kill()
     
-data_dict = {
-    'race':'Throughbreed',
-    'date':'0214',
-    'product':'Basic Program Throughbreed',
-    'track':['golden gate fields', '','']
-}
-get_ppe_name(data_dict)
     
 
 if __name__ == "__main__":
