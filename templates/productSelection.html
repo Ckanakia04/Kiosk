@@ -1,9 +1,9 @@
 {% extends 'index.html' %}
 {% block content %}
-<form action="#" method="post">
+<form method="post">
     {% for productName in result %}
         {% for product in productName %}
-            <input type="submit" name="productType" value={{product}}>
+            <input type="submit" name="productType" value="{{product}}">
         {% endfor %}
     {% endfor %}
 </form>

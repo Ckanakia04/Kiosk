@@ -1,9 +1,9 @@
 {% extends 'index.html' %}
 {% block content %}
 <form method="post">
-    {% for dates in result %}
-        {% for date in dates %}
-            <input type="submit" name="date" value={{date}}>
+    {% for tracks in result %}
+        {% for track in tracks %}
+            <input type="submit" name="track" value="{{track}}">
         {% endfor %}
     {% endfor %}
 </form>
