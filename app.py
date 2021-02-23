@@ -73,7 +73,7 @@ def product(selectedRaceType):
         global gSelectedProductId
         gSelectedProductId = selectedProductId
         userSelection.update({
-            "product": selectedProductId
+            "product": selectedProductName
         })
         global bundleSelectedFlag
         if "Bundle" in selectedProductId:
@@ -98,7 +98,7 @@ def date(selectedProductId):
         })
         return redirect(url_for("track",userSelection = userSelection, selectedDate=selectedDate))
     else:
-        returnedValue = cursor.execute("SELECT Date FROM Race where product_id = %s",selectedProductId)
+        returnedValue = cursor.execute("SELECT DISTINCT Date FROM Race where product_id = %s ORDER BY Date",selectedProductId)
         if returnedValue > 0 :
             result = cursor.fetchall()
             return render_template("dateSelection.html",userSelection = userSelection,result=result)
@@ -133,12 +133,12 @@ def printPPE(userSelection):
 #BHAVIK
 def get_ppe_name(data_dict):
     product = data_dict['product']
-    # print("PRODUCT FROM DICT",product,file=sys.stderr)
-    product_qty_query = f"select product_qty from Product where product_id = '{product}'"
+    product_type = data_dict['race']
+    product_qty_query = f"select product_id,product_qty from Product where product_name = '{product}' and product_type = '{product_type}'"
     cursor.execute(product_qty_query)
     result = list(cursor.fetchone())
-    # product = result[0]
-    product_qty = int(result[0])
+    product = result[0]
+    product_qty = int(result[1])
     ppe_file_name  = []
     ppe_file = []
     for i in range(product_qty):
