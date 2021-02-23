@@ -12,9 +12,32 @@
 </head>
 
 <body>
-    <div class="selection">{{ userSelection }}</div>
-    {% block content %}
-    {% endblock content %}
+    <div class="heading">
+        <div><img class="logo" src="/static/stylesheets/gpd_logo.png" alt=""></div>
+        <div class="dateAndTime"></div>
+    </div>
+    <div class="selection">
+        <div class="raceType">
+            <p>Race</p>
+            <span>{{ userSelection["race"] }}</span>
+        </div>
+        <div class="product">
+            <p>Product</p>
+            <span>{{ userSelection["product"] }}</span>
+        </div>
+        <div class="date">
+            <p>Date</p>
+            <span>{{ userSelection["date"] }}</span>
+        </div>
+        <div class="track">
+            <p>Track</p>
+            <span>{{ userSelection["track"] }}</span>
+        </div>
+    </div>
+    <div class="content">
+        {% block content %}
+        {% endblock content %}
+    </div>
 </body>
 
 </html>

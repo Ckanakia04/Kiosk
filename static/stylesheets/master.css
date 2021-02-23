@@ -6,17 +6,63 @@ body {
     padding: 0;
     margin: 0;
     box-sizing: border-box;
-    /* background-image: linear-gradient(#bdc3c7,#2c3e50); */
     height: 100vh;
+    background: #F5F5F5;
+}
+
+.heading {
+    display: flex;
+    justify-content: space-between;
+    height: 10vh;
+    background: #737373;
+}
+
+.logo {
+    height: 80px;
 }
 
 .selection {
-    border: 1px solid black;
-    height: 100px;
+    height: 10vh;
+    background: #a9a9a9;
+    display: flex;
+    text-align: center;
+}
+
+.selection div {
+    width: 25%;
+}
+
+.selection div p {
+    font-size: 1.5vw;
+    line-height: 0.1;
+}
+
+.selection div span {
+    font-size: 1.5vw;
+}
+
+.content form {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 2% 0 0 0;
+}
+
+.btn {
+    background: none;
+    border: none;
+    background: #737373;
+    height: 15vh;
+    width: 24%;
+    white-space: normal;
+    font-size: 2.5vw;
+    margin: 0.5%;
+    border-radius: 10px;
 }
 
 
-
+.btn:focus {
+    outline: none;
+}
 
 
 

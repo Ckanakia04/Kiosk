@@ -3,7 +3,7 @@
 <form method="post">
     {% for dates in result %}
         {% for date in dates %}
-            <input type="submit" name="date" value={{date}}>
+            <input class="btn" type="submit" name="date" value="{{date}}"">
         {% endfor %}
     {% endfor %}
 </form>

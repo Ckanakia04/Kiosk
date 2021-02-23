@@ -3,7 +3,7 @@
 <form method="post">
     {% for tracks in result %}
         {% for track in tracks %}
-            <input type="submit" name="track" value="{{track}}">
+            <input class="btn" type="submit" name="track" value="{{track}}">
         {% endfor %}
     {% endfor %}
 </form>

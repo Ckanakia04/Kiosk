@@ -3,7 +3,7 @@
 <form method="post">
     {% for productName in result %}
         {% for product in productName %}
-            <input type="submit" name="productType" value="{{product}}">
+            <input class="btn" type="submit" name="productType" value="{{product}}">
         {% endfor %}
     {% endfor %}
 </form>

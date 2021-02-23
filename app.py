@@ -22,7 +22,7 @@ app.config['MYSQL_DATABASE_HOST'] = 'database-2.cslzwwrmb888.us-east-2.rds.amazo
 
 mysql = MySQL(app)
 
-raceTypes = ["Throughbreed","Harness"]
+raceTypes = ["Thoroughbred","Harness"]
 
 bundleSelectedFlag = False
 
@@ -35,18 +35,32 @@ userSelection = {
     "track":""
 }
 
-conn = mysql.connect()
-cursor = conn.cursor()
+# conn = mysql.connect()
+# cursor = conn.cursor()
+
+conn = ""
+cursor = ""
 
 @app.route("/", methods=["POST","GET"])
 def landing():
+    global conn
+    global cursor
+    conn = mysql.connect()
+    cursor = conn.cursor()
+
     if request.method == 'POST':
         selectedRaceType = request.form['raceType']
         userSelection.update({
             "race": selectedRaceType
         })
-        return redirect(url_for("product",userSelection=userSelection, selectedRaceType=selectedRaceType))
+        return redirect(url_for("product",userSelection = userSelection, selectedRaceType=selectedRaceType))
     else:
+        userSelection.update({
+            "race":"",
+            "date":"",
+            "product":"",
+            "track":""
+        })
         return render_template("raceSelection.html",userSelection = userSelection, raceTypes=raceTypes)
 
 @app.route("/product/<selectedRaceType>", methods=["POST","GET"])
@@ -66,12 +80,12 @@ def product(selectedRaceType):
             bundleSelectedFlag = True
         else:
             bundleSelectedFlag = False
-        return redirect(url_for("date",userSelection=userSelection, selectedProductId=selectedProductId))
+        return redirect(url_for("date",userSelection = userSelection, selectedProductId=selectedProductId))
     else:
         returnedValue = cursor.execute("SELECT product_name FROM Product where product_type = %s",selectedRaceType)
         if returnedValue > 0 :
             result = cursor.fetchall()
-            return render_template("productSelection.html",result=result,userSelection=userSelection)
+            return render_template("productSelection.html",userSelection = userSelection,result=result)
         else:
             return("PRODUCT NOT WORKING!")#ERROR PAGE
 
@@ -82,12 +96,12 @@ def date(selectedProductId):
         userSelection.update({
             "date":selectedDate
         })
-        return redirect(url_for("track",userSelection=userSelection, selectedDate=selectedDate))
+        return redirect(url_for("track",userSelection = userSelection, selectedDate=selectedDate))
     else:
         returnedValue = cursor.execute("SELECT Date FROM Race where product_id = %s",selectedProductId)
         if returnedValue > 0 :
             result = cursor.fetchall()
-            return render_template("dateSelection.html",result=result,userSelection=userSelection)
+            return render_template("dateSelection.html",userSelection = userSelection,result=result)
         else:
             return("DATE NOT WORKING!")#ERROR PAGE
 
@@ -99,12 +113,12 @@ def track(selectedDate):
         userSelection.update({
             "track":selectedTrack
         })
-        return redirect(url_for("printPPE",userSelection=userSelection))
+        return redirect(url_for("printPPE", userSelection=userSelection))
     else:
         returnedValue = cursor.execute("SELECT race_course_name FROM Race where Date = %s and product_id = %s",(selectedDate,gSelectedProductId))
         if returnedValue > 0 :
             result = cursor.fetchall()
-            return render_template("trackSelection.html",result=result,userSelection=userSelection)
+            return render_template("trackSelection.html",userSelection = userSelection,result=result)
         else:
             return("DATE NOT WORKING!")#ERROR PAGE
 
@@ -112,7 +126,9 @@ def track(selectedDate):
 def printPPE(userSelection):
     userSelection = ast.literal_eval(userSelection)
     get_ppe_name(userSelection)
+    conn.close()
     return ('', 204)
+    # return(userSelection)
 
 #BHAVIK
 def get_ppe_name(data_dict):
@@ -148,7 +164,7 @@ def download_ppe(location_list):
     with FTP(ftp_client) as ftp:
         ftp.login(user=creds[0],passwd=creds[1])
         ftp.cwd(location)
-        local_filename = os.path.join(r"/Users/chait/Desktop/MSH Prototype", ppe_filename)
+        local_filename = os.path.join(r"/Users/chait/Desktop/Kiosk", ppe_filename)
         lf = open(local_filename, "wb")
         ftp.retrbinary("RETR " + ppe_filename, lf.write, 8*1024)
         lf.close()
