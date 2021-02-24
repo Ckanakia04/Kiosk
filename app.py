@@ -164,16 +164,19 @@ def download_ppe(location_list):
     with FTP(ftp_client) as ftp:
         ftp.login(user=creds[0],passwd=creds[1])
         ftp.cwd(location)
-        local_filename = os.path.join(r"/Users/chait/Desktop/Kiosk", ppe_filename)
+        path = os.path.join(os.path.expanduser('~'), 'downloads')
+        local_filename = os.path.join(path, ppe_filename)
         lf = open(local_filename, "wb")
         ftp.retrbinary("RETR " + ppe_filename, lf.write, 8*1024)
         lf.close()
     return ppe_filename
     
 def print_ppe(ppe_file):
+    path = os.path.join(os.path.expanduser('~'), 'downloads')
     for file in ppe_file:
-        os.startfile(file,"print")
-        sleep(5)
+        local_filename = os.path.join(path, file)
+        os.startfile(local_filename,"print")
+        sleep(10)
         for p in psutil.process_iter(): #Close Acrobat after printing the PDF
             if 'AcroRd' in str(p):
                 p.kill()
