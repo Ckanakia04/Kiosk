@@ -2,7 +2,9 @@
 {% block content %}
 <form action="#" method="post">
     {% for raceType in raceTypes %}
-    <input class="btn" type="submit" name="raceType" value="{{raceType}}"">
+        {% for type in raceType %}
+            <input class="btn" type="submit" name="raceType" value="{{type}}"">
+        {% endfor %}
     {% endfor %}
 </form>
 {% endblock content %}

@@ -53,6 +53,11 @@ userSelection = {
 conn = ""
 cursor = ""
 
+@app.errorhandler(Exception)
+def server_error(err):
+    app.logger.exception(err)
+    return "SOMETHING WENT WRONG", 500
+
 @app.route("/", methods=["POST","GET"])
 def landing():
     global conn
@@ -82,7 +87,12 @@ def landing():
             "product":"",
             "track":""
         })
-        return render_template("raceSelection.html",userSelection = userSelection, userDisplay = userDisplay, raceTypes=raceTypes)
+        returnedValue = cursor.execute("SELECT DISTINCT product_type FROM Product")
+        if returnedValue > 0 :
+            result = cursor.fetchall()
+            return render_template("raceSelection.html",userSelection = userSelection, userDisplay = userDisplay, raceTypes=result)
+        else:
+            raise Exception("SOMETHING WENT WRONG")
 
 @app.route("/product/<selectedRaceType>", methods=["POST","GET"])
 def product(selectedRaceType):
@@ -112,20 +122,18 @@ def product(selectedRaceType):
             return render_template("productSelection.html",userSelection = userSelection, userDisplay = userDisplay,result=result)
         else:
             # return("PRODUCT NOT WORKING!")#ERROR PAGE
-            return redirect(url_for("error"))
+            raise Exception("just crash")
 
 @app.route("/date/<selectedProductId>", methods=["POST","GET"])
 def date(selectedProductId):
     if request.method == 'POST':
         selectedDate = request.form['date']
-        # print("SELECTED DATE TYPE",type(selectedDate),file=sys.stderr)
         userSelection.update({
             "date":selectedDate
         })
         displayDate = ""
         global filtered_result
         for values in filtered_result:
-            # print("list data type",type(values[1]),file=sys.stderr)
             if values[1] == selectedDate:
                 displayDate = values[0]
                 break
@@ -158,7 +166,7 @@ def date(selectedProductId):
             return render_template("dateSelection.html",userSelection = userSelection, userDisplay = userDisplay,result=filtered_result)
         else:
             # return("DATE NOT WORKING!")#ERROR PAGE
-            return redirect(url_for("error"))
+            raise Exception("just crash")
 
 @app.route("/track/<selectedDate>", methods=["POST","GET"])
 def track(selectedDate):
@@ -179,7 +187,7 @@ def track(selectedDate):
             return render_template("trackSelection.html",userSelection = userSelection, userDisplay = userDisplay,result=result)
         else:
             # return("DATE NOT WORKING!")#ERROR PAGE
-            return redirect(url_for("error"))
+            raise Exception("just crash")
 
 @app.route("/get_ppe_name/<userSelection>")
 def printPPE(userSelection):
