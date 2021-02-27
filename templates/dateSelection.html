@@ -2,9 +2,7 @@
 {% block content %}
 <form method="post">
     {% for dates in result %}
-        {% for date in dates %}
-            <input class="btn" type="submit" name="date" value="{{date}}"">
-        {% endfor %}
+        <button class="btn" type="submit" name="date" value={{dates[1]}}>{{dates[0]}}</button>
     {% endfor %}
 </form>
 {% endblock content %}

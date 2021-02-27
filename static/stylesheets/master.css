@@ -62,6 +62,11 @@ body {
     margin: 2% 0 0 0;
 }
 
+.invisible-btn {
+    display: none;
+    visibility: hidden;
+}
+
 .btn {
     border: none;
     background: #efefef;
@@ -83,4 +88,15 @@ body {
 
 .btn:focus {
     outline: none;
+}
+
+.btn:hover {
+    cursor: pointer;
+}
+
+.error-container {
+    width: 10vw;
+    height: 10vh;
+    margin: 0 auto;
+    background-color: red;
 }

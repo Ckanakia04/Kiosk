@@ -1,5 +1,6 @@
 from flask import Flask, redirect, url_for, render_template, request
 from flaskext.mysql import MySQL
+import datetime
 import sys
 import ast
 
@@ -28,6 +29,17 @@ bundleSelectedFlag = False
 
 gSelectedProductId = ""
 
+gSelectedDate = ""
+
+filtered_result = []
+
+userDisplay = {
+    "race":"",
+    "date":"",
+    "product":"",
+    "track":""
+}
+
 userSelection = {
     "race":"",
     "date":"",
@@ -53,7 +65,10 @@ def landing():
         userSelection.update({
             "race": selectedRaceType
         })
-        return redirect(url_for("product",userSelection = userSelection, selectedRaceType=selectedRaceType))
+        userDisplay.update({
+            "race": selectedRaceType
+        })
+        return redirect(url_for("product",userSelection = userSelection, userDisplay = userDisplay, selectedRaceType=selectedRaceType))
     else:
         userSelection.update({
             "race":"",
@@ -61,7 +76,13 @@ def landing():
             "product":"",
             "track":""
         })
-        return render_template("raceSelection.html",userSelection = userSelection, raceTypes=raceTypes)
+        userDisplay.update({
+            "race":"",
+            "date":"",
+            "product":"",
+            "track":""
+        })
+        return render_template("raceSelection.html",userSelection = userSelection, userDisplay = userDisplay, raceTypes=raceTypes)
 
 @app.route("/product/<selectedRaceType>", methods=["POST","GET"])
 def product(selectedRaceType):
@@ -75,35 +96,69 @@ def product(selectedRaceType):
         userSelection.update({
             "product": selectedProductName
         })
+        userDisplay.update({
+            "product": selectedProductName
+        })
         global bundleSelectedFlag
         if "Bundle" in selectedProductId:
             bundleSelectedFlag = True
         else:
             bundleSelectedFlag = False
-        return redirect(url_for("date",userSelection = userSelection, selectedProductId=selectedProductId))
+        return redirect(url_for("date",userSelection = userSelection, userDisplay = userDisplay, selectedProductId=selectedProductId))
     else:
         returnedValue = cursor.execute("SELECT product_name FROM Product where product_type = %s",selectedRaceType)
         if returnedValue > 0 :
             result = cursor.fetchall()
-            return render_template("productSelection.html",userSelection = userSelection,result=result)
+            return render_template("productSelection.html",userSelection = userSelection, userDisplay = userDisplay,result=result)
         else:
-            return("PRODUCT NOT WORKING!")#ERROR PAGE
+            # return("PRODUCT NOT WORKING!")#ERROR PAGE
+            return redirect(url_for("error"))
 
 @app.route("/date/<selectedProductId>", methods=["POST","GET"])
 def date(selectedProductId):
     if request.method == 'POST':
         selectedDate = request.form['date']
+        # print("SELECTED DATE TYPE",type(selectedDate),file=sys.stderr)
         userSelection.update({
             "date":selectedDate
         })
-        return redirect(url_for("track",userSelection = userSelection, selectedDate=selectedDate))
+        displayDate = ""
+        global filtered_result
+        for values in filtered_result:
+            # print("list data type",type(values[1]),file=sys.stderr)
+            if values[1] == selectedDate:
+                displayDate = values[0]
+                break
+            else:
+                displayDate = "WRONG"
+
+        userDisplay.update({
+            "date":displayDate
+        })
+        print("USER SELECTION",userSelection,file=sys.stderr)
+        return redirect(url_for("track",userSelection = userSelection, userDisplay = userDisplay, selectedDate=selectedDate))
     else:
         returnedValue = cursor.execute("SELECT DISTINCT Date FROM Race where product_id = %s ORDER BY Date",selectedProductId)
         if returnedValue > 0 :
             result = cursor.fetchall()
-            return render_template("dateSelection.html",userSelection = userSelection,result=result)
+
+            filtered_result = []
+
+            for string in result:
+                for date in string:
+                    date_month = date[:2]
+                    date_day = date[2:4]
+                    current_date = datetime.datetime.now()
+                    date_year = current_date.year
+                    day_month_year_string = str(date_day)+"/"+str(date_month)+"/"+str(date_year)
+                    date_time_obj = datetime.datetime.strptime(day_month_year_string, "%d/%m/%Y")
+                    final_date_obj = datetime.datetime.strftime(date_time_obj,"%A, %d %B")
+                    filtered_result.append([final_date_obj,date])
+                    
+            return render_template("dateSelection.html",userSelection = userSelection, userDisplay = userDisplay,result=filtered_result)
         else:
-            return("DATE NOT WORKING!")#ERROR PAGE
+            # return("DATE NOT WORKING!")#ERROR PAGE
+            return redirect(url_for("error"))
 
 @app.route("/track/<selectedDate>", methods=["POST","GET"])
 def track(selectedDate):
@@ -113,14 +168,18 @@ def track(selectedDate):
         userSelection.update({
             "track":selectedTrack
         })
+        userDisplay.update({
+            "track":selectedTrack
+        })
         return redirect(url_for("printPPE", userSelection=userSelection))
     else:
         returnedValue = cursor.execute("SELECT race_course_name FROM Race where Date = %s and product_id = %s",(selectedDate,gSelectedProductId))
         if returnedValue > 0 :
             result = cursor.fetchall()
-            return render_template("trackSelection.html",userSelection = userSelection,result=result)
+            return render_template("trackSelection.html",userSelection = userSelection, userDisplay = userDisplay,result=result)
         else:
-            return("DATE NOT WORKING!")#ERROR PAGE
+            # return("DATE NOT WORKING!")#ERROR PAGE
+            return redirect(url_for("error"))
 
 @app.route("/get_ppe_name/<userSelection>")
 def printPPE(userSelection):
@@ -129,6 +188,10 @@ def printPPE(userSelection):
     conn.close()
     return ('', 204)
     # return(userSelection)
+
+@app.route("/error")
+def error():
+    return render_template("errorPage.html")
 
 #BHAVIK
 def get_ppe_name(data_dict):
